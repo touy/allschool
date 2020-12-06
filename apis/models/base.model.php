@@ -1,14 +1,32 @@
 <?php
 namespace Models;
-use Cassandra\Date;
-use Exception;
+use DateTime;
 use Services\Service;
 
 class BaseModel  {
     private ?int $id;
     private ?string $uuid;
-    private ?Date $createdAt;
-    private ?Date $updatedAt;
+    private ?int $isActive;
+
+    /**
+     * @return int|null
+     */
+    public function getIsActive(): ?int
+    {
+        return $this->isActive;
+    }
+
+    /**
+     * @param int|null $isActive
+     * @return BaseModel
+     */
+    public function setIsActive(?int $isActive): BaseModel
+    {
+        $this->isActive = $isActive;
+        return $this;
+    }
+    private ?DateTime $createdAt;
+    private ?DateTime $updatedAt;
     public function __construct(){
         $this->generateCreatedAt();
         $this->generateUpdateAt();
@@ -17,12 +35,12 @@ class BaseModel  {
     public function generateUUID(){
         $this->uuid=Service::guidv4();
     }
-    public function generateCreatedAt():Date{
-        $this->createdAt=new Date();
+    public function generateCreatedAt():DateTime{
+        $this->createdAt=new DateTime();
         return $this->createdAt;
     }
-    public function generateUpdateAt():Date{
-        $this->updatedAt =new Date();
+    public function generateUpdateAt():DateTime{
+        $this->updatedAt =new DateTime();
         return $this->updatedAt;
     }
     /**
@@ -53,7 +71,7 @@ class BaseModel  {
     }
 
     /**
-     * @param float|int $id
+     * @param int $id
      * @return BaseModel
      */
     public function setId(int $id): BaseModel
@@ -63,36 +81,36 @@ class BaseModel  {
     }
 
     /**
-     * @return Date
+     * @return DateTime
      */
-    public function getCreatedAt(): Date{
-        if(!$this->createdAt) $this->createdAt=new Date();
+    public function getCreatedAt(): DateTime{
+        if(!$this->createdAt) $this->createdAt=new DateTime();
         return $this->createdAt;
     }
 
     /**
-     * @param Date $createdAt
+     * @param DateTime $createdAt
      * @return BaseModel
      */
-    public function setCreatedAt(Date $createdAt): BaseModel
+    public function setCreatedAt(DateTime $createdAt): BaseModel
     {
         $this->createdAt = $createdAt;
         return $this;
     }
 
     /**
-     * @return Date
+     * @return DateTime
      */
-    public function getUpdatedAt(): Date{
-        if(!$this->updatedAt) $this->updatedAt=new Date();
+    public function getUpdatedAt(): DateTime{
+        if(!$this->updatedAt) $this->updatedAt=new DateTime();
         return $this->updatedAt;
     }
 
     /**
-     * @param Date $updatedAt
+     * @param DateTime $updatedAt
      * @return BaseModel
      */
-    public function setUpdatedAt(Date $updatedAt): BaseModel
+    public function setUpdatedAt(DateTime $updatedAt): BaseModel
     {
         $this->updatedAt = $updatedAt;
         return $this;

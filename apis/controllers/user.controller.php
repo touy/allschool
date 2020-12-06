@@ -1,5 +1,6 @@
 <?php
 namespace Controllers;
+use Exception;
 use Models\UserModel;
 use Services\Service;
 
@@ -21,20 +22,22 @@ class UserController extends BaseController {
     }
     public function insert():void{
         try{
-            $stmt = $this->prepare('insert into (uuid,username,password,createdAt,updatedAt) `users` values(?,?,?,?)');
+            $sql = 'insert into `users`  (`uuid`,`isActive`,`username`,`password`,`createdAt`,`updatedAt`) values(?,?,?,?)';
+            $stmt = $this->prepare($sql);
             $val=[$this->userModel->getUuid(),
+                1,
                 $this->userModel->getUsername(),
                 $this->userModel->getPassword(),
                 $this->userModel->getCreatedAt(),
                 $this->userModel->getUpdatedAt()];
-            $stmt->bind_param('sssss',$val);
+            $stmt->bind_param('sissss',$val);
             if(!$stmt->execute()){
-                throw new \Exception('inserted failed');
-            };
+                throw new Exception('inserted failed');
+            }
             Service::endResponse([$stmt->insert_id],'inserted OK',status:1);
             $stmt->close();
             $this->close();
-        }catch (\Exception $ex){
+        }catch (Exception $ex){
             Service::endResponse(data:$ex,message:$ex->getMessage(),status: 0);
         }
 
@@ -46,12 +49,12 @@ class UserController extends BaseController {
             $val=[$this->userModel->getId()];
             $stmt->bind_param('i',$val);
             if(!$stmt->execute()){
-                throw new \Exception('deleted failed');
-            };
+                throw new Exception('deleted failed');
+            }
             Service::endResponse([$stmt->insert_id],'deleted OK',status:1);
             $stmt->close();
             $this->close();
-        }catch (\Exception $ex){
+        }catch (Exception $ex){
             Service::endResponse(data:$ex,message:$ex->getMessage(),status: 0);
         }
     }
@@ -73,12 +76,12 @@ class UserController extends BaseController {
                 $this->userModel->getId()];
             $stmt->bind_param('sssiii',$val);
             if(!$stmt->execute()){
-                throw new \Exception('updated failed');
-            };
+                throw new Exception('updated failed');
+            }
             Service::endResponse([$stmt->insert_id],'updated OK',status:1);
             $stmt->close();
             $this->close();
-        }catch (\Exception $ex){
+        }catch (Exception $ex){
             Service::endResponse(data:$ex,message:$ex->getMessage(),status: 0);
         }
     }
@@ -90,7 +93,7 @@ class UserController extends BaseController {
         }
         //....
     }
-    public function findOne():UserModel{
+    public function findOne():?UserModel{
         try{
             $this->userModel->validateId();
             $this->userModel->generateUpdateAt();
@@ -99,17 +102,19 @@ class UserController extends BaseController {
             $val=[$this->userModel->getId()];
             $stmt->bind_param('i',$val);
             if(!$stmt->execute()){
-                throw new \Exception('deleted failed');
-            };
+                throw new Exception('deleted failed');
+            }
             Service::endResponse([$stmt->insert_id],'deleted OK',status:1);
             $result = $stmt->get_result();
             $data = $result->fetch_all(MYSQLI_ASSOC);
             return $this->userModel->Build($data);
-        }catch (\Exception $ex){
+        }catch (Exception $ex){
             Service::endResponse(data:$ex,message:$ex->getMessage(),status: 0);
             $this->close();
         }
+        return null;
     }
+
     public function getOne():void{
         try{
             $this->userModel->validateId();
@@ -119,52 +124,56 @@ class UserController extends BaseController {
             $val=[$this->userModel->getId()];
             $stmt->bind_param('i',$val);
             if(!$stmt->execute()){
-                throw new \Exception('deleted failed');
-            };
+                throw new Exception('deleted failed');
+            }
             $result = $stmt->get_result();
             $data = $result->fetch_all(MYSQLI_ASSOC);
             Service::endResponse([$data],'deleted OK',status:1);
             $stmt->close();
             $this->close();
-        }catch (\Exception $ex){
+        }catch (Exception $ex){
             Service::endResponse(data:$ex,message:$ex->getMessage(),status: 0);
         }
     }
+    /**
+     * @return array<UserModel>
+     */
     public function findMany():array{
         try{
             $this->userModel->validateId();
             $this->userModel->generateUpdateAt();
             $stmt = $this->prepare('select * from  `users` 
-                    where id =?');
-            $val=[$this->userModel->getId()];
+                    LIMIT ?,?');
+            $val=[Service::$limit,Service::$offset];
             $stmt->bind_param('i',$val);
             if(!$stmt->execute()){
-                throw new \Exception('deleted failed');
-            };
+                throw new Exception('find Many failed');
+            }
             $result = $stmt->get_result();
-            return $result->fetch_all(MYSQLI_ASSOC);;
-        }catch (\Exception $ex){
+            return $result->fetch_all(MYSQLI_ASSOC);
+        }catch (Exception $ex){
             Service::endResponse(data:$ex,message:$ex->getMessage(),status: 0);
             $this->close();
         }
+        return [];
     }
     public function getMany():void{
         try{
             $this->userModel->validateId();
             $this->userModel->generateUpdateAt();
             $stmt = $this->prepare('select * from  `users` 
-                    where id =?');
-            $val=[$this->userModel->getId()];
+                    LIMIT ?,?');
+            $val=[Service::$limit,Service::$offset];
             $stmt->bind_param('i',$val);
             if(!$stmt->execute()){
-                throw new \Exception('deleted failed');
-            };
+                throw new Exception('deleted failed');
+            }
             $result = $stmt->get_result();
             $data = $result->fetch_all(MYSQLI_ASSOC);
             Service::endResponse([$data],'deleted OK',status:1);
             $stmt->close();
             $this->close();
-        }catch (\Exception $ex){
+        }catch (Exception $ex){
             Service::endResponse(data:$ex,message:$ex->getMessage(),status: 0);
         }
     }

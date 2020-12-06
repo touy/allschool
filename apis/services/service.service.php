@@ -1,15 +1,19 @@
 <?php namespace Services;
+// use DateTime;
+use Firebase\JWT\JWT;
 use Models\UserModel;
-use \Firebase\JWT\JWT;
+
 use Exception;
+
+
 class Config{
        public static ?int $timezone = 420;
                 public static ?int $client_time_zone =  420;
                 public static ?string $lang =  '';
                 public static ?string $date_fmt =  '';
                 public static ?string $time_fmt =  '';
-                public static ?boolean $sond_alarm =  true;
-                public static ?boolean $popup_alarm =  true;
+                public static ?bool $sond_alarm =  true;
+                public static ?bool $popup_alarm =  true;
                 public static ?string $unit_distance =  'KM';
                 public static ?string $unit_fuel =  'L';
                 public static ?string $unit_temperature =  'C';
@@ -39,9 +43,9 @@ class Service{
         }
         return false;
     }
-    public static function printJSON($data=null,String $message,int $status){
+    public static function printJSON(mixed $data,String $message,int $status){
         try {
-            if(is_array($data)){
+            if(is_array($data) and !$data){
                 echo json_encode(array("data"=>$data,"message"=>$message,"status"=>$status));
             }else{
                 echo json_encode(array("data"=>[$data],"message"=>$message,"status"=>$status));
@@ -51,9 +55,15 @@ class Service{
             die();
         }
     }
-    public static function endResponse($data=null,String $message,int $status){
+
+    /**
+     * @param mixed|null $data
+     * @param String $message
+     * @param int $status
+     */
+    public static function endResponse(mixed $data, String $message, int $status){
         try {
-            if(is_array($data)){
+            if(is_array($data) and !$data){
                 echo json_encode(array("data"=>$data,"message"=>$message,"status"=>$status));
             }else{
                 echo json_encode(array("data"=>[$data],"message"=>$message,"status"=>$status));
@@ -84,7 +94,7 @@ class Service{
             "iat" => 1356999524,
             "nbf" => 1357000000,
             "data" => $user,
-            "updatetime"=>tickTime()
+            "updatetime"=>  Service::tickTime()
         );
         $jwt = JWT::encode($payload, Service::$key);
 
@@ -115,7 +125,7 @@ class Service{
                 return $config;
             }
         }
-        catch (\Exception $e) {
+        catch (Exception $ex) {
             //die($e);
             return null;
         }
@@ -137,7 +147,7 @@ class Service{
                 return $user->pass;
             }
         }
-        catch (\Exception $e) {
+        catch (Exception $ex) {
             //die($e);
             return null;
         }
@@ -160,7 +170,7 @@ class Service{
                 return $user->uid;
             }
         }
-        catch (\Exception $e) {
+        catch (Exception $ex) {
             //die($e);
             return -1;
         }
@@ -205,9 +215,10 @@ class Service{
     public static function refreshToken($jwt){
         $decoded = JWT::decode($jwt,  Service::$key, array('HS256'));
         $decoded_array = (array) $decoded;
-        return registerToken($decoded_array['data']);
+        return Service::registerToken($decoded_array['data']);
     }
-    public static function tickTime(){
+    public static function tickTime(): float|int
+    {
         $mt = microtime(true);
         $mt =  $mt*1000; //microsecs
         return (string)$mt*10; //100 Nanosecs

@@ -1,4 +1,5 @@
 <?php namespace Controllers;
+use Exception;
 use mysqli;
 use Services\Service;
 

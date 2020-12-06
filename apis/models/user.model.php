@@ -1,6 +1,7 @@
 <?php
 namespace Models;
 
+use Exception;
 use Services\Service;
 
 class UserModel extends BaseModel {
